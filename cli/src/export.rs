@@ -238,7 +238,7 @@ fn prepare_exporters_impl(
         }
     }
 
-    fn compile_it<D: typst::Document + Send + Sync + 'static>(
+    fn compile_it<D: typst::model::Document + Send + Sync + 'static + typst::foundations::Output>(
         graph: &Arc<WorldComputeGraph<SystemCompilerFeat>>,
     ) -> Result<Option<Arc<D>>> {
         let _ = graph.provide::<FlagTask<CompilationTask<D>>>(Ok(FlagTask::flag(true)));
@@ -246,7 +246,7 @@ fn prepare_exporters_impl(
     }
 
     fn export_bytes<
-        D: typst::Document + Send + Sync + 'static,
+        D: typst::model::Document + Send + Sync + 'static + typst::foundations::Output,
         T: ExportComputation<SystemCompilerFeat, D, Output = Bytes>,
     >(
         graph: &Arc<WorldComputeGraph<SystemCompilerFeat>>,
@@ -259,7 +259,7 @@ fn prepare_exporters_impl(
     }
 
     fn export_string<
-        D: typst::Document + Send + Sync + 'static,
+        D: typst::model::Document + Send + Sync + 'static + typst::foundations::Output,
         T: ExportComputation<SystemCompilerFeat, D, Output = String>,
     >(
         graph: &Arc<WorldComputeGraph<SystemCompilerFeat>>,

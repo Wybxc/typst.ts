@@ -195,7 +195,7 @@ impl CompileOnceArgs {
                 };
 
                 let path = match entry.strip_prefix(root) {
-                    Ok(rel) => VirtualPath::new(rel),
+                    Ok(rel) => VirtualPath::new(rel.to_str().unwrap_or(".")).unwrap(),
                     Err(_) => clap::Error::raw(
                         clap::error::ErrorKind::InvalidValue,
                         format!(

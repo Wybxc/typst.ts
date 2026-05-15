@@ -89,7 +89,15 @@ impl fmt::Display for DiagMsgFmt<'_> {
         f.write_str(&self.0.message)?;
         if !self.0.hints.is_empty() {
             f.write_str(", hints: ")?;
-            f.write_str(&self.0.hints.join(", "))?;
+            f.write_str(
+                &self
+                    .0
+                    .hints
+                    .iter()
+                    .map(|h| h.v.as_str())
+                    .collect::<Vec<_>>()
+                    .join(", "),
+            )?;
         }
 
         Ok(())
@@ -104,7 +112,8 @@ impl fmt::Display for PosFmt<'_> {
             typst::diag::Tracepoint::Call(Some(name)) => write!(f, "while calling {name}"),
             typst::diag::Tracepoint::Call(None) => write!(f, "while calling closure"),
             typst::diag::Tracepoint::Show(name) => write!(f, "while showing {name}"),
-            typst::diag::Tracepoint::Import => write!(f, "import"),
+            typst::diag::Tracepoint::Import(_) => write!(f, "import"),
+            typst::diag::Tracepoint::Include(_) => write!(f, "include"),
         }
     }
 }

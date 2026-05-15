@@ -239,7 +239,7 @@ impl TypstCompiler {
         Ok(())
     }
 
-    fn run_compile<T: reflexo_typst::TypstDocumentTrait>(
+    fn run_compile<T: reflexo_typst::TypstDocumentTrait + typst::foundations::Output>(
         cell: &mut Option<Option<Arc<T>>>,
         warnings_cell: &mut Vec<EcoVec<SourceDiagnostic>>,
         errors_cell: &mut Vec<EcoVec<SourceDiagnostic>>,
@@ -287,8 +287,8 @@ impl SnapshotArgs {
 
 enum InputOpts {
     CompileDefault,
-    Compile(wasm_bindgen::__rt::RcRef<SnapshotArgs>),
-    Compiled(wasm_bindgen::__rt::RcRef<TypstDocument>),
+    Compile(JsBorrow<SnapshotArgs>),
+    Compiled(JsBorrow<TypstDocument>),
 }
 
 impl TryFrom<(u8, &Object)> for InputOpts {
@@ -297,8 +297,8 @@ impl TryFrom<(u8, &Object)> for InputOpts {
     fn try_from((kind, value): (u8, &Object)) -> Result<Self, Self::Error> {
         Ok(match kind {
             0 => InputOpts::CompileDefault,
-            1 => InputOpts::Compile(SnapshotArgs::js_value_as_ref(value)),
-            2 => InputOpts::Compiled(TypstDocument::js_value_as_ref(value)),
+            1 => InputOpts::Compile(JsBorrow::from_ref(value).map_err(|e| JsError::new(&format!("{e:?}")))?),
+            2 => InputOpts::Compiled(JsBorrow::from_ref(value).map_err(|e| JsError::new(&format!("{e:?}")))?),
             _ => return Err(JsError::new("Invalid input kind.")),
         })
     }
@@ -358,8 +358,11 @@ enum CompileType {
 #[wasm_bindgen]
 #[derive(Clone)]
 struct TypstDocument {
+    #[wasm_bindgen(skip)]
     world: Arc<WorldComputeGraph<BrowserCompilerFeat>>,
+    #[wasm_bindgen(skip)]
     paged: Option<Option<Arc<TypstPagedDocument>>>,
+    #[wasm_bindgen(skip)]
     html: Option<Option<Arc<TypstHtmlDocument>>>,
     warnings: Vec<EcoVec<SourceDiagnostic>>,
     errors: Vec<EcoVec<SourceDiagnostic>>,

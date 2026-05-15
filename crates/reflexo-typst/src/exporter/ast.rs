@@ -23,7 +23,8 @@ impl<F: CompilerFeat> WorldComputable<F> for AstExport {
         let src = world
             .source(world.main())
             .context_ut("failed to get main")?;
-        let path = src.id().vpath().as_rootless_path();
+        let id = src.id();
+        let path = id.vpath().as_rootless_path();
         dump_ast(&path.display().to_string(), &src, &mut writer)
             .map_err(|e| FileError::from_io(e, path))
             .context_ut("failed to dump ast")?;

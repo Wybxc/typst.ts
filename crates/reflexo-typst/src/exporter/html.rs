@@ -1,6 +1,7 @@
 use std::fmt::Write;
 use std::sync::{Arc, OnceLock};
 
+use comemo::Track;
 use ecow::{eco_format, EcoString};
 use reflexo::error::prelude::*;
 use reflexo::typst::TypstHtmlDocument;
@@ -9,7 +10,8 @@ use typst::diag::{bail, At, SourceResult, StrResult};
 use typst::foundations::Repr;
 use typst::introspection::Introspector;
 use typst::syntax::Span;
-use typst_html::{charsets, tag, HtmlAttr, HtmlElement, HtmlFrame, HtmlNode, HtmlTag};
+use typst::model::LateLinkResolver;
+use typst_html::{tag, HtmlAttr, HtmlElement, HtmlFrame, HtmlNode, HtmlTag};
 
 pub type ExportStaticHtmlTask = tinymist_task::ExportHtmlTask;
 pub type StaticHtmlExport = tinymist_task::HtmlExport;
@@ -42,8 +44,8 @@ pub struct HtmlOutput {
 
 impl HtmlOutput {
     fn root_child(&self, idx: Option<usize>) -> Option<&HtmlElement> {
-        match self.document.root.children.get(idx?)? {
-            HtmlNode::Element(e) => Some(e),
+        match self.document.root().children.get(idx?)? {
+            HtmlNode::Element(e) => Some(&e),
             _ => None,
         }
     }
@@ -98,7 +100,7 @@ impl HtmlOutput {
     pub fn body(&self) -> SourceResult<&str> {
         self.body
             .get_or_init(|| {
-                let introspector = &self.document.introspector;
+                let introspector = self.document.introspector().as_ref();
                 let mut w = Writer::new(introspector, self.pretty);
                 write_indent(&mut w);
                 if let Some(body) = self.root_child(self.body_idx) {
@@ -119,11 +121,11 @@ impl HtmlOutput {
     pub fn html(&self) -> SourceResult<&str> {
         self.html
             .get_or_init(|| {
-                let introspector = &self.document.introspector;
+                let introspector = self.document.introspector().as_ref();
                 let mut w = Writer::new(introspector, self.pretty);
                 w.buf.push_str("<!DOCTYPE html>\n");
                 write_indent(&mut w);
-                write_element(&mut w, &self.document.root)?;
+                write_element(&mut w, self.document.root())?;
                 if w.pretty {
                     w.buf.push('\n');
                 }
@@ -151,8 +153,8 @@ fn find_tag_child(element: &HtmlElement, tag: HtmlTag) -> Option<usize> {
 
 /// Encodes an HTML document into a string.
 pub fn static_html(document: &Arc<TypstHtmlDocument>) -> SourceResult<HtmlOutput> {
-    let head_idx = find_tag_child(&document.root, tag::head);
-    let body_idx = find_tag_child(&document.root, tag::body);
+    let head_idx = find_tag_child(document.root(), tag::head);
+    let body_idx = find_tag_child(document.root(), tag::body);
 
     Ok(HtmlOutput {
         pretty: true,
@@ -170,14 +172,14 @@ struct Writer<'a> {
     /// The current indentation level
     level: usize,
     /// The document's introspector.
-    introspector: &'a Introspector,
+    introspector: &'a dyn Introspector,
     /// Whether pretty printing is enabled.
     pretty: bool,
 }
 
 impl<'a> Writer<'a> {
     /// Creates a new writer.
-    fn new(introspector: &'a Introspector, pretty: bool) -> Self {
+    fn new(introspector: &'a dyn Introspector, pretty: bool) -> Self {
         Self {
             buf: String::new(),
             level: 0,
@@ -211,7 +213,7 @@ fn write_node(w: &mut Writer, node: &HtmlNode, escape_text: bool) -> SourceResul
 /// Encodes plain text into the writer.
 fn write_text(w: &mut Writer, text: &str, span: Span, escape: bool) -> SourceResult<()> {
     for c in text.chars() {
-        if escape || !charsets::is_valid_in_normal_element_text(c) {
+        if escape || !local_charsets::is_valid_in_normal_element_text(c) {
             write_escape(w, c).at(span)?;
         } else {
             w.buf.push(c);
@@ -240,7 +242,7 @@ fn write_element_with_tag(w: &mut Writer, element: &HtmlElement, tag: &str) -> S
             w.buf.push('=');
             w.buf.push('"');
             for c in value.chars() {
-                if charsets::is_valid_in_attribute_value(c) {
+                if local_charsets::is_valid_in_attribute_value(c) {
                     w.buf.push(c);
                 } else {
                     write_escape(w, c).at(element.span)?;
@@ -334,7 +336,7 @@ fn write_raw(w: &mut Writer, element: &HtmlElement) -> SourceResult<()> {
         bail!(
             element.span,
             "HTML raw text element cannot contain its own closing tag";
-            hint: "the sequence `{closing}` appears in the raw text",
+            hint: "the sequence `{closing}` appears in the raw text"
         )
     }
 
@@ -375,7 +377,7 @@ fn write_escapable_raw(w: &mut Writer, element: &HtmlElement) -> SourceResult<()
 fn collect_raw_text(element: &HtmlElement) -> SourceResult<String> {
     let mut text = String::new();
     walk_raw_text(element, |piece, span| {
-        if let Some(c) = piece.chars().find(|&c| !charsets::is_w3c_text_char(c)) {
+        if let Some(c) = piece.chars().find(|&c| !local_charsets::is_w3c_text_char(c)) {
             return Err(unencodable(c)).at(span);
         }
         text.push_str(piece);
@@ -459,10 +461,51 @@ impl RawMode {
 /// <https://www.w3.org/TR/css-text-3/#example-af2745cd> shows how adding CSS
 /// rules to `<p>` can make it sensitive to whitespace. For this reason, we
 /// should also respect the `style` tag in the future.
+fn is_block_by_default(tag: HtmlTag) -> bool {
+    matches!(
+        tag,
+        tag::address
+            | tag::article
+            | tag::aside
+            | tag::blockquote
+            | tag::body
+            | tag::dd
+            | tag::details
+            | tag::dialog
+            | tag::div
+            | tag::dl
+            | tag::dt
+            | tag::fieldset
+            | tag::figcaption
+            | tag::figure
+            | tag::footer
+            | tag::form
+            | tag::h1
+            | tag::h2
+            | tag::h3
+            | tag::h4
+            | tag::h5
+            | tag::h6
+            | tag::head
+            | tag::header
+            | tag::hgroup
+            | tag::hr
+            | tag::html
+            | tag::legend
+            | tag::main
+            | tag::nav
+            | tag::ol
+            | tag::p
+            | tag::pre
+            | tag::section
+            | tag::summary
+            | tag::table
+            | tag::ul
+    )
+}
+
 fn allows_pretty_inside(tag: HtmlTag) -> bool {
-    (tag::is_block_by_default(tag) && tag != tag::pre)
-        || tag::is_tabular_by_default(tag)
-        || tag == tag::li
+    (is_block_by_default(tag) && tag != tag::pre) || tag == tag::li
 }
 
 /// Whether newlines should be added before and after the element if the parent
@@ -471,7 +514,7 @@ fn allows_pretty_inside(tag: HtmlTag) -> bool {
 /// In contrast to `allows_pretty_inside`, which is purely spec-driven, this is
 /// more subjective and depends on preference.
 fn wants_pretty_around(tag: HtmlTag) -> bool {
-    allows_pretty_inside(tag) || tag::is_metadata(tag) || tag == tag::pre
+    allows_pretty_inside(tag) || tag::is_metadata_content(tag) || tag == tag::pre
 }
 
 /// Escape a character.
@@ -483,7 +526,7 @@ fn write_escape(w: &mut Writer, c: char) -> StrResult<()> {
         '>' => w.buf.push_str("&gt;"),
         '"' => w.buf.push_str("&quot;"),
         '\'' => w.buf.push_str("&apos;"),
-        c if charsets::is_w3c_text_char(c) && c != '\r' => {
+        c if local_charsets::is_w3c_text_char(c) && c != '\r' => {
             write!(w.buf, "&#x{:x};", c as u32).unwrap()
         }
         _ => return Err(unencodable(c)),
@@ -499,12 +542,56 @@ fn unencodable(c: char) -> EcoString {
 
 /// Encode a laid out frame into the writer.
 fn write_frame(w: &mut Writer, frame: &HtmlFrame) {
-    let svg = typst_svg::svg_html_frame(
+    let link_resolver = LateLinkResolver::new(None, w.introspector);
+    let svg = typst_svg::svg_in_html(
         &frame.inner,
         frame.text_size,
         frame.id.as_deref(),
-        &frame.link_points,
-        w.introspector,
+        "",
+        &frame.anchors,
+        link_resolver.track(),
     );
     w.buf.push_str(&svg);
+}
+
+mod local_charsets {
+    pub const fn is_valid_in_normal_element_text(c: char) -> bool {
+        match c {
+            '&' => false,
+            '<' => false,
+            c => is_w3c_text_char(c),
+        }
+    }
+
+    pub const fn is_valid_in_attribute_value(c: char) -> bool {
+        match c {
+            '&' => false,
+            '"' => false,
+            c => is_w3c_text_char(c),
+        }
+    }
+
+    pub const fn is_w3c_text_char(c: char) -> bool {
+        match c {
+            c if is_whatwg_non_char(c) => false,
+            c if is_whatwg_control_char(c) => c.is_ascii_whitespace(),
+            _ => true,
+        }
+    }
+
+    const fn is_whatwg_non_char(c: char) -> bool {
+        match c {
+            '\u{fdd0}'..='\u{fdef}' => true,
+            c if c as u32 & 0xfffe == 0xfffe && c as u32 <= 0x10ffff => true,
+            _ => false,
+        }
+    }
+
+    const fn is_whatwg_control_char(c: char) -> bool {
+        match c {
+            '\u{00}'..='\u{1f}' => true,
+            '\u{7f}'..='\u{9f}' => true,
+            _ => false,
+        }
+    }
 }

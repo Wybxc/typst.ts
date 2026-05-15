@@ -113,14 +113,7 @@ pub fn render_svg_html<Feat: ExportFeature>(output: &TypstPagedDocument) -> Stri
     // wrap SVG with html
     let mut html: Vec<SvgText> = Vec::with_capacity(svg.len() + 3);
     html.push(r#"<!DOCTYPE html><html><head><meta charset="utf-8" /><title>"#.into());
-    html.push(SvgText::Plain(
-        output
-            .info
-            .title
-            .as_ref()
-            .map(|s| s.to_string())
-            .unwrap_or_else(|| "Typst TypstPagedDocument".into()),
-    ));
+    html.push(SvgText::Plain("Typst Paged Document".into()));
     html.push(r#"</title></head><body>"#.into());
     html.append(&mut svg);
     html.push(r#"</body></html>"#.into());

@@ -490,7 +490,7 @@ impl TypstCompileWorld {
         })
     }
 
-    fn get_diag<D: TypstDocumentTrait + Send + Sync + 'static>(
+    fn get_diag<D: TypstDocumentTrait + Send + Sync + 'static + typst::foundations::Output>(
         &self,
         diagnostics_format: u8,
     ) -> Result<JsValue, JsValue> {
@@ -534,7 +534,7 @@ impl TypstCompileWorld {
         })
     }
 
-    fn get_doc_t<D: TypstDocumentTrait + Send + Sync + 'static>(
+    fn get_doc_t<D: TypstDocumentTrait + Send + Sync + 'static + typst::foundations::Output>(
         &self,
     ) -> Result<Option<Arc<D>>, JsValue> {
         // todo: don't coupled me with compilation.
@@ -571,7 +571,7 @@ pub struct TDiagnosticsTask<D> {
     _phantom: std::marker::PhantomData<D>,
 }
 
-impl<F: CompilerFeat, D: typst::TypstDocumentTrait + Send + Sync + 'static> WorldComputable<F>
+impl<F: CompilerFeat, D: typst::TypstDocumentTrait + Send + Sync + 'static + typst::foundations::Output> WorldComputable<F>
     for TDiagnosticsTask<D>
 {
     type Output = Self;

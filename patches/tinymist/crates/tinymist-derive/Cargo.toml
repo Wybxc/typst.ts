@@ -1,0 +1,21 @@
+[package]
+name = "tinymist-derive"
+description = "Provides derive for tinymist."
+categories = ["compilers"]
+keywords = ["typst"]
+# group: world
+version = "0.14.6-rc3"
+authors = ["The Typst Project Developers"]
+license = "Apache-2.0"
+edition = "2021"
+homepage = "https://github.com/Myriad-Dreamin/tinymist"
+repository = "https://github.com/Myriad-Dreamin/tinymist"
+rust-version = "1.88.0"
+
+[dependencies]
+syn = "2"
+quote = "1"
+
+[lib]
+proc-macro = true
+

@@ -1,0 +1,86 @@
+[package]
+name = "tinymist-std"
+description = "Additional functions wrapping Rust's standard library."
+# group: world
+version = "0.14.6-rc3"
+authors = ["The Typst Project Developers"]
+license = "Apache-2.0"
+edition = "2021"
+homepage = "https://github.com/Myriad-Dreamin/tinymist"
+repository = "https://github.com/Myriad-Dreamin/tinymist"
+
+[dependencies]
+
+anyhow = "1"
+base64 = "0.22"
+bitvec = "1"
+comemo = "0.5.0"
+dashmap = "=5.5.3"
+ecow = { version = "0.2.6", features = ["serde"] }
+fxhash = "0.2.1"
+log = "0.4"
+path-clean = "1.0.1"
+pathdiff = "0.2"
+parking_lot = "0.12.1"
+rustc-hash = "2"
+serde = { version = "1", features = ["derive"] }
+serde_repr = "0.1"
+serde_json = "1"
+serde_with = "3"
+siphasher = "1"
+web-time = { version = "1.1.0", optional = true }
+time = { version = "0.3", features = ["formatting"] }
+lsp-types = "=0.95.0"
+tempfile = { version = "3.19.1", optional = true }
+same-file = { version = "1.0.6", optional = true }
+battery = { version = "0.7.8", optional = true }
+
+# feature = "web"
+js-sys = { version = "^0.3", optional = true }
+wasm-bindgen = { version = "^0.2", optional = true }
+
+# feature = "rkyv"
+rkyv = { version = "0.7.42", optional = true }
+
+# feature = "typst"
+typst = { version = "0.14.2", optional = true }
+typst-html = { version = "0.14.2", optional = true }
+typst-layout = { version = "0.14.2", optional = true }
+typst-shim = { version = "0.14.6-rc2", optional = true }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+core-foundation = "0.10.0"
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2.155"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61.2", features = [
+    "Win32_Foundation",
+    "Win32_Security",
+    "Win32_Storage_FileSystem",
+    "Win32_System_IO",
+    "Win32_System_Console",
+    "Win32_System_JobObjects",
+    "Win32_System_Threading",
+] }
+
+[dev-dependencies]
+hex = "0.4.3"
+
+[features]
+
+default = ["full"]
+full = ["web", "rkyv", "typst"]
+
+typst = ["dep:typst", "dep:typst-shim", "dep:typst-html", "dep:typst-layout"]
+
+rkyv = ["rkyv/alloc", "rkyv/archive_le"]
+rkyv-validation = ["rkyv/validation"]
+
+__web = ["wasm-bindgen", "js-sys", "web-time"]
+web = ["__web"]
+system = ["tempfile", "same-file"]
+battery = ["dep:battery"]
+bi-hash = []
+

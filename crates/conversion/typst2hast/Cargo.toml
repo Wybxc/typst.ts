@@ -33,6 +33,7 @@ ttf-parser.workspace = true
 typst.workspace = true
 typst-svg.workspace = true
 typst-html.workspace = true
+typst-layout = "0.14.2"
 xmlparser.workspace = true
 base64.workspace = true
 

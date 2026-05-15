@@ -1,0 +1,33 @@
+[package]
+name = "tinymist-vfs"
+description = "Vfs for tinymist."
+# group: world
+version = "0.14.6-rc3"
+authors = ["The Typst Project Developers"]
+license = "Apache-2.0"
+edition = "2021"
+homepage = "https://github.com/Myriad-Dreamin/tinymist"
+repository = "https://github.com/Myriad-Dreamin/tinymist"
+
+[dependencies]
+
+typst = "0.14.2"
+tinymist-std = { version = "0.14.6-rc2", features = ["typst"] }
+parking_lot = "0.12.1"
+nohash-hasher.workspace = true
+indexmap.workspace = true
+comemo = "0.5.0"
+ecow = "0.2.6"
+log = "0.4"
+rpds = "1"
+
+wasm-bindgen = { version = "^0.2", optional = true }
+web-sys = { version = "^0.3", optional = true, features = ["console"] }
+js-sys = { version = "^0.3", optional = true }
+
+[features]
+
+web = ["wasm-bindgen", "web-sys", "js-sys", "tinymist-std/web"]
+browser = ["web"]
+system = ["tinymist-std/system"]
+

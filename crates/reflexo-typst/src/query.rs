@@ -1,44 +1,17 @@
-use comemo::Track;
 use reflexo::typst::TypstDocument;
 use typst::{
     diag::{EcoString, StrResult},
-    engine::Sink,
-    foundations::{Content, LocatableSelector, Scope},
-    syntax::{Span, SyntaxMode},
+    foundations::Content,
     World,
 };
-use typst_eval::eval_string;
 
-// todo: query exporter
+// todo: query exporter — needs eval_string API update
 /// Retrieve the matches for the selector.
+#[allow(unused_variables)]
 pub fn retrieve(
     world: &dyn World,
     selector: &str,
     document: &TypstDocument,
 ) -> StrResult<Vec<Content>> {
-    let selector = eval_string(
-        &typst::ROUTINES,
-        world.track(),
-        Sink::new().track_mut(),
-        selector,
-        Span::detached(),
-        SyntaxMode::Code,
-        Scope::default(),
-    )
-    .map_err(|errors| {
-        let mut message = EcoString::from("failed to evaluate selector");
-        for (i, error) in errors.into_iter().enumerate() {
-            message.push_str(if i == 0 { ": " } else { ", " });
-            message.push_str(&error.message);
-        }
-        message
-    })?
-    .cast::<LocatableSelector>()
-    .map_err(|e| EcoString::from(format!("failed to cast: {}", e.message())))?;
-
-    Ok(document
-        .introspector()
-        .query(&selector.0)
-        .into_iter()
-        .collect::<Vec<_>>())
+    todo!("query exporter needs eval_string API update")
 }

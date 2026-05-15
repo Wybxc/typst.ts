@@ -1,0 +1,84 @@
+[package]
+name = "tinymist-world"
+description = "Typst's World implementation for tinymist."
+categories = ["compilers"]
+keywords = ["language", "typst"]
+# group: world
+version = "0.14.6-rc3"
+authors = ["The Typst Project Developers"]
+license = "Apache-2.0"
+edition = "2021"
+homepage = "https://github.com/Myriad-Dreamin/tinymist"
+repository = "https://github.com/Myriad-Dreamin/tinymist"
+rust-version = "1.88.0"
+
+[dependencies]
+
+anyhow = "1"
+chrono = { version = "0.4.38", default-features = false, optional = true, features = [
+    "std",
+    "clock",
+] }
+clap = "4.5"
+codespan-reporting = "0.11"
+comemo = "0.5.0"
+dirs = { version = "6", optional = true }
+ecow = "0.2.6"
+flate2 = "1"
+fontdb = { version = "0.23", optional = true }
+hex = "0.4.3"
+js-sys = { version = "^0.3", optional = true }
+log = "0.4"
+lsp-types = "=0.95.0"
+parking_lot = "0.12.1"
+rayon = "1.11.0"
+reqwest = { version = "0.12", optional = true }
+rpds = "1"
+serde = "1"
+serde_json = "1"
+serde_with = "3"
+serde-wasm-bindgen = { version = "^0.6", optional = true }
+sha2 = "0.10.6"
+strum = { version = "0.26.3", features = ["derive"] }
+tar = "0.4"
+tinymist-package = "0.14.6-rc2"
+tinymist-std = "0.14.6-rc2"
+tinymist-vfs = "0.14.6-rc2"
+typst-shim = "0.14.6-rc2"
+typst = "0.14.2"
+typst-assets = "0.14.2"
+typst-layout = "0.14.2"
+ttf-parser = "0.25.0"
+wasm-bindgen = { version = "^0.2", optional = true }
+web-sys = { version = "^0.3", optional = true, features = ["console"] }
+
+[features]
+
+default = []
+fonts = ["typst-assets/fonts"]
+http-registry = ["reqwest"]
+web = [
+    "chrono",
+    "chrono/wasmbind",
+    "wasm-bindgen",
+    "web-sys",
+    "js-sys",
+    "serde-wasm-bindgen",
+    "tinymist-std/web",
+    "tinymist-vfs/web",
+    "tinymist-package/web",
+]
+browser = ["web", "tinymist-vfs/browser", "tinymist-package/browser"]
+system = [
+    "dirs",
+    "fontdb",
+    "chrono",
+    "http-registry",
+    "tinymist-std/system",
+    "tinymist-vfs/system",
+    "tinymist-package/system",
+]
+
+[package.metadata.docs.rs]
+features = ["browser", "system"]
+

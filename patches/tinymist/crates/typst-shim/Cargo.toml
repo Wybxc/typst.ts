@@ -1,0 +1,23 @@
+[package]
+name = "typst-shim"
+description = "A compatibility layer for Typst release and mainline versions."
+authors = ["The Typst Project Developers"]
+# group: world
+version = "0.14.6-rc3"
+edition = "2021"
+license = "Apache-2.0"
+homepage = "https://github.com/Myriad-Dreamin/tinymist"
+repository = "https://github.com/Myriad-Dreamin/tinymist"
+rust-version = "1.88.0"
+
+[features]
+default = []
+nightly = []
+
+[dependencies]
+typst-syntax = "0.14.2"
+typst-eval = "0.14.2"
+typst = "0.14.2"
+cfg-if = "1.0"
+comemo = "0.5.0"
+

@@ -1,0 +1,40 @@
+[package]
+name = "tinymist-l10n"
+description = "Localization support for tinymist and typst."
+categories = ["compilers", "command-line-utilities"]
+keywords = ["language", "typst"]
+# group: world
+version = "0.14.6-rc3"
+authors = ["The Typst Project Developers"]
+license = "Apache-2.0"
+edition = "2021"
+homepage = "https://github.com/Myriad-Dreamin/tinymist"
+repository = "https://github.com/Myriad-Dreamin/tinymist"
+rust-version = "1.88.0"
+
+[[bin]]
+name = "tinymist-l10n"
+path = "src/main.rs"
+required-features = ["cli"]
+test = false
+doctest = false
+bench = false
+doc = false
+
+[dependencies]
+
+anyhow = "1"
+clap = { version = "4.5", optional = true }
+ecow = "0.2.6"
+rayon = "1.11.0"
+rustc-hash = "2"
+serde_json = "1"
+walkdir = "2"
+
+[dev-dependencies]
+insta = "1.43"
+
+[features]
+default = ["cli"]
+cli = ["clap", "clap/wrap_help"]
+

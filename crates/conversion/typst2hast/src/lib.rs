@@ -14,7 +14,7 @@ pub mod hast;
 
 /// Encodes an HTML document into a Hast.
 pub fn hast(document: &Arc<TypstHtmlDocument>) -> SourceResult<HastElementContent> {
-    write_element(&document.root)
+    write_element(&document.root())
 }
 
 /// Encode an HTML node into the writer.
@@ -77,7 +77,15 @@ fn write_element_with_tag(element: &HtmlElement, tag: &str) -> SourceResult<Hast
 /// Encode a laid out frame into the writer.
 fn write_frame(frame: &Frame, buf: &mut Vec<HastElementContent>) {
     // FIXME: This string replacement is obviously a hack.
-    let svg = typst_svg::svg_frame(frame)
+    // New typst API: svg_frame -> svg, takes &Page instead of &Frame
+    let page = typst_layout::Page {
+        frame: frame.clone(),
+        fill: typst::foundations::Smart::Auto,
+        numbering: None,
+        supplement: typst::foundations::Content::empty(),
+        number: 0,
+    };
+    let svg = typst_svg::svg(&page)
         .replace("<svg class", "<svg style=\"overflow: visible;\" class");
 
     // create a img base64

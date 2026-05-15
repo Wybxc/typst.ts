@@ -141,7 +141,7 @@ impl NodeCompiler {
     }
 
     /// Compiles the document internally.
-    fn compile_raw<D: TypstDocumentTrait + ArcInto<TypstDocument> + Send + Sync + 'static>(
+    fn compile_raw<D: TypstDocumentTrait + ArcInto<TypstDocument> + Send + Sync + 'static + reflexo_typst::foundations::Output>(
         &mut self,
         opts: CompileDocArgs,
     ) -> Result<NodeTypstCompileResult, NodeError> {
@@ -150,7 +150,7 @@ impl NodeCompiler {
     }
 
     /// Compiles the document internally.
-    fn compile_raw2<D: TypstDocumentTrait + ArcInto<TypstDocument> + Send + Sync + 'static>(
+    fn compile_raw2<D: TypstDocumentTrait + ArcInto<TypstDocument> + Send + Sync + 'static + reflexo_typst::foundations::Output>(
         &mut self,
         opts: CompileDocArgs,
     ) -> std::result::Result<ExecResultRepr<NodeTypstDocument>, NodeError> {
@@ -188,7 +188,7 @@ impl NodeCompiler {
     }
 
     /// Compiles the document as a specific type.
-    pub fn may_compile<D: TypstDocumentTrait + Send + Sync + 'static>(
+    pub fn may_compile<D: TypstDocumentTrait + Send + Sync + 'static + reflexo_typst::foundations::Output>(
         &mut self,
         opts: MayCompileOpts,
     ) -> Result<NodeTypstDocument, NodeError>
@@ -210,7 +210,7 @@ impl NodeCompiler {
     }
 
     /// Compiles the document as a specific type.
-    pub fn may_compile2<D: TypstDocumentTrait + Send + Sync + 'static>(
+    pub fn may_compile2<D: TypstDocumentTrait + Send + Sync + 'static + reflexo_typst::foundations::Output>(
         &mut self,
         opts: MayCompileOpts,
     ) -> std::result::Result<ExecResultRepr<NodeTypstDocument>, NodeError>
