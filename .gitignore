@@ -19,3 +19,5 @@ dist/
 node_modules/
 
 typst.ts.code-workspace
+
+*.tgz

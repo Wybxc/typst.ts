@@ -1,4 +1,4 @@
-import type { CompileArgs, QueryDocArgs } from '@myriaddreamin/typst-ts-node-compiler';
+import type { CompileArgs, QueryDocArgs } from '@wybxc/typst-ts-node-compiler';
 import * as path from 'path';
 import { ResolvedTypstInput } from './input.js';
 import { ExecResult } from './index.js';

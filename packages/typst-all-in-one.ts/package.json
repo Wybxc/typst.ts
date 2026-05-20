@@ -1,5 +1,5 @@
 {
-    "name": "@myriaddreamin/typst-all-in-one.ts",
+    "name": "@wybxc/typst-all-in-one.ts",
     "version": "0.7.0",
     "description": "Run Typst in JavaScriptWorld with a single bundled library.",
     "author": "Myriad-Dreamin",
@@ -40,6 +40,6 @@
         "publish:lib": "npm publish --access public || exit 0"
     },
     "devDependencies": {
-        "@myriaddreamin/typst.ts": "*"
+        "@wybxc/typst.ts": "*"
     }
 }

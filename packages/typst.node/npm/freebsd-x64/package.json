@@ -1,5 +1,5 @@
 {
-  "name": "@myriaddreamin/typst-ts-node-compiler-freebsd-x64",
+  "name": "@wybxc/typst-ts-node-compiler-freebsd-x64",
   "version": "0.7.0",
   "os": [
     "freebsd"

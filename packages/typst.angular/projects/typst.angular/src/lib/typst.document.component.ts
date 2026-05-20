@@ -1,6 +1,6 @@
 import { Component, ElementRef, Input, ViewChild } from '@angular/core';
-import { withGlobalRenderer } from '@myriaddreamin/typst.ts/contrib/global-renderer';
-import * as typst from '@myriaddreamin/typst.ts';
+import { withGlobalRenderer } from '@wybxc/typst.ts/contrib/global-renderer';
+import * as typst from '@wybxc/typst.ts';
 
 let moduleInitOptions: typst.InitOptions = {
   beforeBuild: [],

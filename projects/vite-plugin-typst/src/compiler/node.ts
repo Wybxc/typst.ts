@@ -3,7 +3,7 @@ import {
   NodeHtmlOutput,
   NodeTypstProject,
   ProjectWatcher,
-} from '@myriaddreamin/typst-ts-node-compiler';
+} from '@wybxc/typst-ts-node-compiler';
 import { CompileProvider, TypstHTMLCompiler } from '../compiler.js';
 import { ResolvedTypstInput } from '../input.js';
 

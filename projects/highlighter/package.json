@@ -1,5 +1,5 @@
 {
-  "name": "@myriaddreamin/highlighter-typst",
+  "name": "@wybxc/highlighter-typst",
   "version": "0.7.0",
   "description": "typst code highlighting support in web",
   "author": "Myriad Dreamin <camiyoru@gmail.com>",
@@ -27,12 +27,12 @@
     "dist/**/*.{mts,mjs,cjs,cts,ts,js}"
   ],
   "peerDependencies": {
-    "@myriaddreamin/typst.ts": "^0.7.0",
-    "@myriaddreamin/typst-ts-parser": "^0.7.0"
+    "@wybxc/typst.ts": "^0.7.0",
+    "@wybxc/typst-ts-parser": "^0.7.0"
   },
   "devDependencies": {
-    "@myriaddreamin/typst.ts": "*",
-    "@myriaddreamin/typst-ts-parser": "*",
+    "@wybxc/typst.ts": "*",
+    "@wybxc/typst-ts-parser": "*",
     "vite": "^6.2.3",
     "vitest": "^3.0.9"
   },
